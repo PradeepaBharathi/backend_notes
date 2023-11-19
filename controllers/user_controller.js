@@ -1,22 +1,32 @@
-import { client } from "../db.js";
-import { ObjectId } from "bson";
-import jwt from "jsonwebtoken"
+const { dbConnection } = require("../db.js");
+const { ObjectId } = require("bson");
+const jwt = require("jsonwebtoken");
 
-export function addUser(data) {
+async function addUser(data) {
+  const client = await dbConnection();
   return client.db("notes").collection("users").insertOne(data);
 }
 
-export function getUser(data) {
+async function getUser(data) {
+  const client = await dbConnection();
   return client.db("notes").collection("users").findOne(data);
 }
 
-export function getUserByID(id) {
+async function getUserByID(id) {
+  const client = await dbConnection();
   return client
     .db("notes")
     .collection("users")
     .findOne({ _id: new ObjectId(id) });
 }
 
-export function generateToken(id, secret) {
+async function generateToken(id, secret) {
+ console.log(id)
   return jwt.sign({ id }, process.env.SECRET_KEY, { expiresIn: "30d" });
 }
+module.exports = {
+  addUser,
+  getUser,
+  getUserByID,
+  generateToken,
+};

@@ -1,7 +1,11 @@
-import express from "express";
-import bcrypt from "bcryptjs";
-import { addUser, generateToken, getUser, getUserByID } from "../controllers/user_controller.js";
-
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const {
+  addUser,
+  generateToken,
+  getUser,
+  getUserByID,
+} = require("../controllers/user_controller.js");
 
 const router = express.Router();
 
@@ -45,9 +49,16 @@ router.post("/signup", async (req, res) => {
     const user = await getUser({ email: req.body.email });
     //validating if user already exist
     if (!user) {
-        const hashedPassword = await bcrypt.hash(req.body.password, salt);
-         const hasedConfirmPassword = await bcrypt.hash(req.body.confirmPassword, salt);
-      const hashedUser = await { ...req.body, password: hashedPassword,confirmPassword:hasedConfirmPassword };
+      const hashedPassword = await bcrypt.hash(req.body.password, salt);
+      const hasedConfirmPassword = await bcrypt.hash(
+        req.body.confirmPassword,
+        salt
+      );
+      const hashedUser = await {
+        ...req.body,
+        password: hashedPassword,
+        confirmPassword: hasedConfirmPassword,
+      };
       const result = await addUser(hashedUser);
       // checking mongodb acknowledgement
       if (!result.acknowledged) {
@@ -55,7 +66,13 @@ router.post("/signup", async (req, res) => {
           .status(404)
           .json({ message: "Error uploading user information" });
       }
-      return res.status(201).json({ data: hashedUser,success:true,message:"registration successfull" });
+      return res
+        .status(201)
+        .json({
+          data: hashedUser,
+          success: true,
+          message: "registration successfull",
+        });
     }
     res.status(400).json({ message: "Email already exist" });
   } catch (error) {
@@ -70,7 +87,7 @@ router.post("/login", async (req, res) => {
     //user exist validations
     const user = await getUser({ email: req.body.email });
     if (!user) {
-      return res.status(404).json({ message: "Invalid Email" ,status:404});
+      return res.status(404).json({ message: "Invalid Email", status: 404 });
     }
     // validating password
     const validPassword = await bcrypt.compare(
@@ -80,11 +97,20 @@ router.post("/login", async (req, res) => {
     if (!validPassword) {
       return res.status(400).json({ message: "Invalid Password" });
     }
-    const token = generateToken(user._id);
-    res.status(200).json({ data: user,success:true,message:"login successful",token:token});
+    const token = await generateToken(user._id);
+    console.log(token)
+    res
+      .status(200)
+      .json({
+        data: user,
+        success: true,
+        message: "login successful",
+        token: token,
+      });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
-export const user_router = router;
+
+module.exports = {user_router:router};

@@ -1,7 +1,8 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 
-export function isAuthenticated(req, res, next) {
-  const token = req.headers["x-auth-token"];
+ function isAuthenticated(req, res, next) {
+     const token = req.headers["x-auth-token"];
+     console.log(token)
   if (!token) {
     return res.status(400).json({ message: "Invalid Authorization" });
   }
@@ -10,3 +11,6 @@ export function isAuthenticated(req, res, next) {
   console.log(decode);
   next();
 }
+module.exports = {
+  isAuthenticated,
+};
